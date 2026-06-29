@@ -1,0 +1,18 @@
+# Built binaries
+bin/
+
+# latte-c vendored checkout and build artifacts
+vendor/
+
+# Rust
+rust/target/
+
+# D compiler artifacts
+*.o
+*.obj
+
+# Go
+go/demo
+
+# macOS
+.DS_Store
