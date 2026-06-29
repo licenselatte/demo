@@ -1,0 +1,11 @@
+[package]
+name = "latte-demo-rust"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "demo"
+path = "src/main.rs"
+
+[build-dependencies]
+bindgen = "0.70"
