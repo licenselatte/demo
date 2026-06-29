@@ -73,18 +73,18 @@ Each demo prompts for a key, activates it, prints the license details, then perf
 ## Clean
 
 ```sh
-make clean  # removes bin/ and the latte-c build artifacts
+make clean      # removes bin/ and the latte-c build artifacts
 make clean-all  # also removes the vendor/latte-c checkout
 ```
 
 ## Structure
 
 ```
-bin/    built executables (created by make)
-c/      C demo
-cpp/    C++ demo
-rust/     Rust demo (bindgen FFI)
-d/      D demo
-go/     Go demo (latte-go native SDK)
-vendor/latte-c/ cloned on first build
+bin/             built executables (created by make)
+c/               C demo
+cpp/             C++ demo
+rust/            Rust demo (bindgen FFI)
+d/               D demo
+go/              Go demo (latte-go native SDK)
+vendor/latte-c/  cloned on first build
 ```
