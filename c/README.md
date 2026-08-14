@@ -26,6 +26,8 @@ Output: `bin/c`
 
 ## Notes
 
-- `latte_new` → `latte_activate` → `latte_check` → `latte_free`
+- `latte_config_new` → `latte_new` → `latte_activate` → `latte_check` → `latte_free`
+- `latte_config_free` releases the config; `latte_new` only reads it, so it can be freed
+  right after the `latte_new` call regardless of success
 - `latte_license_free` must be called on every non-NULL `latte_license*` returned
 - The C header is at `vendor/latte-c/include/latte/latte.h`

@@ -8,8 +8,15 @@
 
 int main(void)
 {
+    latte_config *cfg = latte_config_new(APP_ID);
+    if (!cfg) {
+        fprintf(stderr, "SDK init failed: could not build config\n");
+        return 1;
+    }
+
     latte_sdk *sdk = NULL;
-    latte_status st = latte_new(APP_ID, &sdk);
+    latte_status st = latte_new(cfg, &sdk);
+    latte_config_free(cfg);
     if (st != LATTE_OK) {
         fprintf(stderr, "SDK init failed: %s\n", latte_strerror(st));
         return 1;
