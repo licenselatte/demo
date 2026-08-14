@@ -1,7 +1,9 @@
 # C++ demo
 
-Wraps `latte-c` (C-ABI) in a minimal RAII class. The header is included via
-`extern "C"` no separate C++ SDK is needed.
+Uses `latte-c`'s official header-only C++ wrapper (`<latte/latte.hpp>`), shipped
+alongside the C library since latte-c 1.1. `latte::Config`/`latte::Sdk`/
+`latte::License` are move-only RAII classes over the opaque C handles, and
+`latte::Error` turns `latte_status` failures into exceptions.
 
 ## Prerequisites
 
@@ -26,6 +28,10 @@ Output: `bin/cpp`
 
 ## Notes
 
-- `LatteSDK` wraps the opaque `latte_sdk*` handle and frees it in its destructor
-- `activate` and `check` throw `std::runtime_error` on any non-`LATTE_OK` status
-- Raw `latte_license*` pointers are still caller-managed via `latte_license_free`
+- `latte::Config`/`latte::Sdk`/`latte::License` free their underlying C resource
+  in their destructor; none of `latte_free`/`latte_config_free`/`latte_license_free`
+  are called directly by the demo
+- `sdk.activate(key)` and `sdk.check()` throw `latte::Error` (a `std::runtime_error`)
+  on any non-`LATTE_OK` status
+- The wrapper header lives at `vendor/latte-c/include/latte/latte.hpp`, alongside
+  the plain C header the [C demo](../c) uses directly
