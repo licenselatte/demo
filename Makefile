@@ -25,14 +25,14 @@ CJSON_LIB := $(LATTE_LIB_DIR)/libcjson.a
 
 D_COMPILER := $(shell command -v ldc2 2>/dev/null || command -v dmd 2>/dev/null || echo dmd)
 
-.PHONY: all latte-c c cpp rust d go clean clean-all
+.PHONY: all latte-c c cpp d go rust python run-python clean clean-all
 
-all: c cpp rust d go
+all: c cpp d go rust python
 
 bin:
 	@mkdir -p bin
 
-# ── latte-c (shared dependency for C, C++, Rust, D) ─────────────────────────
+# ── latte-c (shared dependency for C, C++, D) ───────────────────────────────
 $(LATTE_LIB):
 	@if [ ! -d "$(LATTE_DIR)/.git" ]; then \
 		git clone --depth 1 $(LATTE_REPO) $(LATTE_DIR); \
@@ -56,12 +56,6 @@ cpp: $(LATTE_LIB) | bin
 	  cpp/main.cpp $(LATTE_LIB) $(CJSON_LIB) $(EXTRA_LFLAGS) \
 	  -o bin/cpp
 
-# ── Rust ─────────────────────────────────────────────────────────────────────
-rust: $(LATTE_LIB) | bin
-	LATTE_C_ROOT=$(abspath $(LATTE_DIR)) \
-	cargo build --manifest-path rust/Cargo.toml --release
-	cp rust/target/release/demo bin/rust
-
 # ── D ────────────────────────────────────────────────────────────────────────
 d: $(LATTE_LIB) | bin
 	$(D_COMPILER) d/app.d $(LATTE_LIB) $(CJSON_LIB) \
@@ -72,9 +66,24 @@ d: $(LATTE_LIB) | bin
 go: | bin
 	cd go && go build -o ../bin/go .
 
+# ── Rust (uses latte-rs natively no latte-c dependency) ─────────────────────
+rust: | bin
+	cargo build --manifest-path rust/Cargo.toml --release
+	cp rust/target/release/demo bin/rust
+
+# ── Python (uses latte-py natively no latte-c dependency) ──────────────────
+python: python/.venv/bin/python
+
+python/.venv/bin/python:
+	python3 -m venv python/.venv
+	python/.venv/bin/pip install -e python
+
+run-python: python
+	python/.venv/bin/python python/main.py
+
 # ── Clean ────────────────────────────────────────────────────────────────────
 clean:
-	rm -rf bin rust/target $(BUILD_DIR)
+	rm -rf bin rust/target $(BUILD_DIR) python/.venv
 
 clean-all: clean
 	rm -rf $(LATTE_DIR)
