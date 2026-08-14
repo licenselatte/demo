@@ -14,5 +14,9 @@ rust/target/
 # Go
 go/demo
 
+# Python
+python/.venv/
+*.egg-info/
+
 # macOS
 .DS_Store
