@@ -1,74 +1,76 @@
-mod latte;
-
-use std::ffi::{CStr, CString};
 use std::io::{self, Write};
-use std::ptr;
+use std::time::{SystemTime, UNIX_EPOCH};
+
+use latte_rs::error::LatteError;
+use latte_rs::{Config, PublicLicense, Sdk};
+
+fn unix_secs(t: SystemTime) -> u64 {
+    t.duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
+}
 
 const APP_ID: &str = "pk_live_G98S8BKDDMZW32RMQM8NZT33E5CTFEDC";
 
 // Test key (unlimited activations): G98S8-BWAR6-Y0Z7F-JT10A-7EWD9-33265
 
-unsafe fn cstr(p: *mut ::std::os::raw::c_char) -> &'static str {
-    if p.is_null() { "" } else { CStr::from_ptr(p).to_str().unwrap_or("") }
+/// latte-rs has no `unsafe` and no OS-fingerprinting of its own (unlike
+/// latte-c/latte-go) — it takes an opaque machine ID string from the
+/// integrator. A real app should use a stable per-device fingerprint; this
+/// demo just falls back to the hostname.
+fn demo_machine_id() -> String {
+    std::env::var("HOSTNAME")
+        .or_else(|_| std::env::var("COMPUTERNAME"))
+        .unwrap_or_else(|_| "demo-machine".to_string())
 }
 
-fn main() {
-    let app_id = CString::new(APP_ID).unwrap();
-    let mut sdk: *mut latte::latte_sdk = ptr::null_mut();
+fn print_license(lic: &PublicLicense) {
+    println!("  Key:           {}", lic.key);
+    println!("  ActivationID:  {}", lic.activation_id);
+    println!("  LicenseType:   {:?}", lic.license_type);
+    println!("  IssuedAt:      {}", unix_secs(lic.issued_at));
+    println!("  ExpiresAt:     {}", unix_secs(lic.expires_at));
+    println!("  InGracePeriod: {}", lic.in_grace_period);
+    if !lic.metadata.is_empty() {
+        println!("  Metadata:");
+    }
+    for (k, v) in &lic.metadata {
+        println!("    {k} = {v}");
+    }
+}
 
-    unsafe {
-        let st = latte::latte_new(app_id.as_ptr(), &mut sdk);
-        if st != latte::latte_status::LATTE_OK {
-            eprintln!(
-                "SDK init failed: {}",
-                CStr::from_ptr(latte::latte_strerror(st)).to_string_lossy()
-            );
+#[tokio::main]
+async fn main() {
+    let sdk = match Sdk::new(Config::with_app_id(APP_ID)) {
+        Ok(sdk) => sdk,
+        Err(e) => {
+            eprintln!("SDK init failed: {e}");
             return;
         }
-    }
+    };
+
+    let machine_id = demo_machine_id();
 
     print!("License key (e.g. XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX):\n> ");
     io::stdout().flush().unwrap();
 
     let mut input = String::new();
     io::stdin().read_line(&mut input).unwrap();
-    let key = CString::new(input.trim()).unwrap();
+    let key = input.trim();
 
-    unsafe {
-        let mut lic: *mut latte::latte_license = ptr::null_mut();
-        let st = latte::latte_activate(sdk, key.as_ptr(), &mut lic);
-        if st != latte::latte_status::LATTE_OK {
-            eprintln!(
-                "Activation error: {}",
-                CStr::from_ptr(latte::latte_strerror(st)).to_string_lossy()
-            );
-            latte::latte_free(sdk);
+    match sdk.activate(key, &machine_id).await {
+        Ok(lic) => {
+            println!("License activated!");
+            print_license(&lic);
+        }
+        Err(e) => {
+            eprintln!("Activation error: {e}");
             return;
         }
+    }
 
-        let l = &*lic;
-        println!("License activated!");
-        println!("  Key:           {}", cstr(l.key));
-        println!("  ActivationID:  {}", cstr(l.activation_id));
-        println!("  LicenseType:   {}", cstr(l.license_type));
-        println!("  IssuedAt:      {}", l.issued_at);
-        println!("  ExpiresAt:     {}", l.expires_at);
-        println!("  InGracePeriod: {}", l.in_grace_period);
-
-        for i in 0..l.metadata_count as usize {
-            let kv = &*l.metadata.add(i);
-            println!("    {} = {}", cstr(kv.key), cstr(kv.value));
-        }
-
-        latte::latte_license_free(lic);
-
-        // Demonstrate offline check
-        let mut checked: *mut latte::latte_license = ptr::null_mut();
-        if latte::latte_check(sdk, &mut checked) == latte::latte_status::LATTE_OK {
-            println!("\nOffline check passed: key={}", cstr((*checked).key));
-            latte::latte_license_free(checked);
-        }
-
-        latte::latte_free(sdk);
+    // Demonstrate offline check
+    match sdk.check(&machine_id) {
+        Ok(lic) => println!("\nOffline check passed: key={}", lic.key),
+        Err(LatteError::NotActivated) => eprintln!("Check error: not activated on this machine"),
+        Err(e) => eprintln!("Check error: {e}"),
     }
 }

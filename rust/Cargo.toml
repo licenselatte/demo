@@ -7,5 +7,6 @@ edition = "2021"
 name = "demo"
 path = "src/main.rs"
 
-[build-dependencies]
-bindgen = "0.70"
+[dependencies]
+latte-rs = "0.1"
+tokio = { version = "1", features = ["macros", "rt-multi-thread", "io-std"] }
