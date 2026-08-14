@@ -8,6 +8,7 @@ import core.stdc.stdint : int64_t, uint32_t;
 
 extern (C) {
     struct latte_sdk {}
+    struct latte_config {}
 
     struct latte_kv {
         char* key;
@@ -35,6 +36,7 @@ extern (C) {
         LATTE_ERR_SEAT_LIMIT,
         LATTE_ERR_LICENSE_NOT_FOUND,
         LATTE_ERR_INVALID_PROJECT_KEY,
+        LATTE_ERR_INVALID_CONFIG,
         LATTE_ERR_INVALID_APPID,
         LATTE_ERR_UNKNOWN_ENVIRONMENT,
         LATTE_ERR_INVALID_APPID_KEY_SEGMENT,
@@ -46,12 +48,14 @@ extern (C) {
         LATTE_ERR_INTERNAL,
     }
 
-    latte_status latte_new(const char* app_id, latte_sdk** out_);
-    latte_status latte_activate(latte_sdk* sdk, const char* key, latte_license** out_);
-    latte_status latte_check(latte_sdk* sdk, latte_license** out_);
-    void         latte_license_free(latte_license* lic);
-    void         latte_free(latte_sdk* sdk);
-    const(char)* latte_strerror(latte_status s);
+    latte_config* latte_config_new(const char* app_id);
+    void          latte_config_free(latte_config* cfg);
+    latte_status  latte_new(const latte_config* config, latte_sdk** out_);
+    latte_status  latte_activate(latte_sdk* sdk, const char* key, latte_license** out_);
+    latte_status  latte_check(latte_sdk* sdk, latte_license** out_);
+    void          latte_license_free(latte_license* lic);
+    void          latte_free(latte_sdk* sdk);
+    const(char)*  latte_strerror(latte_status s);
 }
 
 // ── helpers ───────────────────────────────────────────────────────────────────
@@ -63,8 +67,15 @@ string cstr(char* p) {
 // ── main ──────────────────────────────────────────────────────────────────────
 
 void main() {
+    auto cfg = latte_config_new("pk_live_G98S8BKDDMZW32RMQM8NZT33E5CTFEDC".toStringz);
+    if (cfg is null) {
+        stderr.writeln("SDK init failed: could not build config");
+        return;
+    }
+
     latte_sdk* sdk;
-    auto st = latte_new("pk_live_G98S8BKDDMZW32RMQM8NZT33E5CTFEDC".toStringz, &sdk);
+    auto st = latte_new(cfg, &sdk);
+    latte_config_free(cfg);
     if (st != latte_status.LATTE_OK) {
         stderr.writefln("SDK init failed: %s", latte_strerror(st).fromStringz);
         return;

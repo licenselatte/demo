@@ -28,6 +28,8 @@ Output: `bin/d`
 
 ## Notes
 
+- `latte_config_new` → `latte_new` → `latte_activate` → `latte_check` → `latte_free`;
+  the config is freed right after `latte_new` since `latte_new` only reads it
 - `extern(C)` blocks in D declare C-ABI functions and structs with no overhead
 - `scope(exit)` ensures `latte_free` and `latte_license_free` always run,
   even if an error path returns early equivalent to C++'s RAII or Go's `defer`
