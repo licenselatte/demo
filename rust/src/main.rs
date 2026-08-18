@@ -5,10 +5,12 @@ use latte_rs::error::LatteError;
 use latte_rs::{Config, PublicLicense, Sdk};
 
 fn unix_secs(t: SystemTime) -> u64 {
-    t.duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
+    t.duration_since(UNIX_EPOCH)
+        .map(|d| d.as_secs())
+        .unwrap_or(0)
 }
 
-const APP_ID: &str = "pk_live_G98S8BKDDMZW32RMQM8NZT33E5CTFEDC";
+const APP_ID: &str = "pk_live_B6P99K2SXM14PCZAEG8JYJS5MPAHXWVT";
 
 // Test key (unlimited activations): G98S8-BWAR6-Y0Z7F-JT10A-7EWD9-33265
 
