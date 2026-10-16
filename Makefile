@@ -1,5 +1,6 @@
 SHELL   := /bin/bash
 LATTE_REPO  := https://github.com/licenselatte/latte-c
+LATTE_VERSION := v1.5.0
 LATTE_DIR := vendor/latte-c
 BUILD_DIR := $(LATTE_DIR)/build
 
@@ -35,7 +36,7 @@ bin:
 # ── latte-c (shared dependency for C, C++, D) ───────────────────────────────
 $(LATTE_LIB):
 	@if [ ! -d "$(LATTE_DIR)/.git" ]; then \
-		git clone --depth 1 $(LATTE_REPO) $(LATTE_DIR); \
+		git clone --depth 1 --branch $(LATTE_VERSION) $(LATTE_REPO) $(LATTE_DIR); \
 	fi
 	cmake -S $(LATTE_DIR) -B $(BUILD_DIR) -DCMAKE_BUILD_TYPE=Release
 	cmake --build $(BUILD_DIR) --target latte_static -- -j4

@@ -549,9 +549,9 @@ dependencies = [
 
 [[package]]
 name = "latte-rs"
-version = "0.2.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "76b07626b7c4a9f3bb2e7337c128de417bf99b581aa86010ec077150d04b0c00"
+checksum = "6637d54bb8f387776e74ec4feb039381e5a628e2cf2e4c9019450574b9e29f50"
 dependencies = [
  "base64",
  "dirs",
@@ -560,6 +560,7 @@ dependencies = [
  "reqwest",
  "serde",
  "serde_json",
+ "sha2",
  "thiserror 2.0.20",
 ]
 

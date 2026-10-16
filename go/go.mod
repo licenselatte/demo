@@ -2,7 +2,7 @@ module github.com/licenselatte/latte-demo-go
 
 go 1.26.4
 
-require github.com/licenselatte/latte-go v1.3.0
+require github.com/licenselatte/latte-go v1.6.0
 
 require (
 	github.com/denisbrodbeck/machineid v1.0.1 // indirect

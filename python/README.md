@@ -37,11 +37,10 @@ python/.venv/bin/python python/main.py
 ## Notes
 
 - `Sdk(Config(app_id=...))` creates one SDK instance per process;
-  `sdk.activate(key, machine_id)` and `sdk.check(machine_id)` are synchronous
-- Unlike `latte-c`/`latte-go`, `latte-py` does no OS-level machine fingerprinting
-  of its own — the caller supplies an opaque `machine_id` string. This demo
-  falls back to `platform.node()` (hostname) for simplicity; a real integration
-  should use a stable per-device fingerprint
+  `sdk.activate(key)` and `sdk.check()` are synchronous
+- The SDK derives this machine's ID from the platform's own machine ID, the
+  same way `latte-c`/`latte-go` do; pass `Config(machine_id=...)` to supply
+  your own raw ID instead
 - There's no background renewal: call `sdk.renew(...)` yourself on whatever
   schedule fits your application (not shown in this demo)
 - Read latte-py's "Threat Model" section before relying on it for anything

@@ -10,19 +10,9 @@ fn unix_secs(t: SystemTime) -> u64 {
         .unwrap_or(0)
 }
 
-const APP_ID: &str = "pk_live_B6P99K2SXM14PCZAEG8JYJS5MPAHXWVT";
+const APP_ID: &str = "pk_live_G98S8BKDDMZW32RMQM8NZT33E5CTFEDC";
 
 // Test key (unlimited activations): G98S8-BWAR6-Y0Z7F-JT10A-7EWD9-33265
-
-/// latte-rs has no `unsafe` and no OS-fingerprinting of its own (unlike
-/// latte-c/latte-go) — it takes an opaque machine ID string from the
-/// integrator. A real app should use a stable per-device fingerprint; this
-/// demo just falls back to the hostname.
-fn demo_machine_id() -> String {
-    std::env::var("HOSTNAME")
-        .or_else(|_| std::env::var("COMPUTERNAME"))
-        .unwrap_or_else(|_| "demo-machine".to_string())
-}
 
 fn print_license(lic: &PublicLicense) {
     println!("  Key:           {}", lic.key);
@@ -49,8 +39,6 @@ async fn main() {
         }
     };
 
-    let machine_id = demo_machine_id();
-
     print!("License key (e.g. XXXXX-XXXXX-XXXXX-XXXXX-XXXXX-XXXXX):\n> ");
     io::stdout().flush().unwrap();
 
@@ -58,7 +46,7 @@ async fn main() {
     io::stdin().read_line(&mut input).unwrap();
     let key = input.trim();
 
-    match sdk.activate(key, &machine_id).await {
+    match sdk.activate(key).await {
         Ok(lic) => {
             println!("License activated!");
             print_license(&lic);
@@ -70,7 +58,7 @@ async fn main() {
     }
 
     // Demonstrate offline check
-    match sdk.check(&machine_id) {
+    match sdk.check() {
         Ok(lic) => println!("\nOffline check passed: key={}", lic.key),
         Err(LatteError::NotActivated) => eprintln!("Check error: not activated on this machine"),
         Err(e) => eprintln!("Check error: {e}"),

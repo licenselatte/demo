@@ -34,12 +34,11 @@ cargo build --manifest-path rust/Cargo.toml --release
 ## Notes
 
 - `Sdk::new(Config::with_app_id(...))` creates one SDK instance per process;
-  `sdk.activate(key, machine_id)` and `sdk.check(machine_id)` are `async` (the
-  `http`/`cache` crate features, both on by default) and driven here by a
-  `#[tokio::main]` runtime
-- Unlike `latte-c`/`latte-go`, `latte-rs` does no OS-level machine fingerprinting
-  of its own — the caller supplies an opaque `machine_id` string. This demo
-  falls back to the `HOSTNAME`/`COMPUTERNAME` env var for simplicity; a real
-  integration should use a stable per-device fingerprint
+  `sdk.activate(key)` is `async` (the `http`/`cache` crate features, both on
+  by default) and driven here by a `#[tokio::main]` runtime; `sdk.check()` is
+  synchronous
+- The SDK derives this machine's ID from the platform's own machine ID, the
+  same way `latte-c`/`latte-go` do; use `Config::with_machine_id(...)` to
+  supply your own raw ID instead
 - There's no background renewal thread: call `sdk.renew(...)` yourself on
   whatever schedule fits your application (not shown in this demo)

@@ -8,5 +8,5 @@ name = "demo"
 path = "src/main.rs"
 
 [dependencies]
-latte-rs = "0.2"
+latte-rs = "0.5"
 tokio = { version = "1", features = ["macros", "rt-multi-thread", "io-std"] }
