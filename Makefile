@@ -1,6 +1,6 @@
 SHELL   := /bin/bash
 LATTE_REPO  := https://github.com/licenselatte/latte-c
-LATTE_VERSION := v1.5.0
+LATTE_VERSION := v1.5.1
 LATTE_DIR := vendor/latte-c
 BUILD_DIR := $(LATTE_DIR)/build
 
